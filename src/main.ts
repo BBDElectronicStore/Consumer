@@ -1,7 +1,11 @@
 import {messageHandlers} from "./lib/decorators/handle";
 import {HelloConsumer} from "./consumers/hello.consumer";
 
-console.log(messageHandlers)
+/**
+ * Please add your consumers to this array
+ * Nothing gets done with the array but we have to do this
+ * Because javascript, idk ask the guy who made it
+ */
 const consumers = [
     HelloConsumer
 ]
