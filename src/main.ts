@@ -1,4 +1,4 @@
-import {messageHandlers} from "./lib/consume";
+import {messageHandlers} from "./lib/decorators/handle";
 import {HelloConsumer} from "./consumers/hello.consumer";
 
 console.log(messageHandlers)
