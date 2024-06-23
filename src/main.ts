@@ -1,7 +1,7 @@
 import {messageHandlers} from "./lib/decorators/handle";
 import {HelloConsumer} from "./consumers/hello.consumer";
 import {listenToQueue} from "./lib/listen";
-import {Logger} from "./lib/logger";
+import {ElectronicsStoreDefaultConfig} from "./config/electronics";
 
 /**
  * Please add your consumers to this array
@@ -11,14 +11,4 @@ import {Logger} from "./lib/logger";
 const consumers = [
     HelloConsumer
 ]
-const mainQueue = process.env.MAIN_QUEUE;
-const queueUrl = process.env.QUEUE_URL;
-if (!mainQueue) {
-    Logger.error('No main queue specified. Exiting');
-    process.exit(1);
-}
-if (!queueUrl) {
-    Logger.error('No queue url specified. Exiting');
-    process.exit(1);
-}
-listenToQueue(messageHandlers, mainQueue, queueUrl).then();
+listenToQueue(messageHandlers, ElectronicsStoreDefaultConfig).then();

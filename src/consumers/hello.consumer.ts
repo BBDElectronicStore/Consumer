@@ -20,7 +20,9 @@ export class HelloConsumer implements IConsume<void, [message: any]>{
     @Handle(HelloMessage.default)
     async successHandler(message: any) {
         const command = new HelloCommand(new HelloRepository());
-
+        if(true) {
+            throw new Error("Error");
+        }
         return `${command.execute()} ${message.content}`;
     }
 
