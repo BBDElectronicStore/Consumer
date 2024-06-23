@@ -20,8 +20,8 @@ export class HelloConsumer implements IConsume<void, [message: any]>{
     @Handle(HelloMessage.default)
     async successHandler(message: any) {
         const command = new HelloCommand(new HelloRepository());
-        console.log(command.execute());
-        console.log("handling hello message");
+
+        return `${command.execute()} ${message.content}`;
     }
 
     // Do we need error queues to replay messages pushed to the error queue

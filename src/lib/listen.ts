@@ -13,16 +13,34 @@ export async function listenToQueue(handlers: Map<string, MessageHandler>, queue
 
         Logger.debug(`Waiting for messages from queue: ${queue}`);
 
-        await channel.consume(queue, (msg) => {
+        await channel.consume(queue, async (msg) => {
             if (msg !== null) {
                 const messageName = msg.properties.headers?.name || 'Unnamed Message';
                 const messageContent = msg.content.toString();
+                const replyTo = msg.properties.replyTo;
+                const correlationId = msg.properties.correlationId;
 
-                Logger.debug(`Received message: ${messageName}`);
-                Logger.debug(`Message content: ${messageContent}`);
+                Logger.debug(`[${correlationId}] ${messageName}`);
+                Logger.debug(`[${correlationId}] Body: ${messageContent}`);
                 const handler = handlers.get(messageName);
                 if (handler) {
-                    handler(JSON.parse(messageContent));
+                    try {
+                        const result = await handler(JSON.parse(messageContent));
+
+                        if (replyTo) {
+                            channel.sendToQueue(replyTo, Buffer.from(JSON.stringify(result)), {
+                                correlationId: correlationId
+                            });
+                            Logger.debug(`[${correlationId}] response: ${result}`);
+                        }
+                    } catch (error) {
+                        Logger.error(`Error processing message: ${error}`);
+                        if (replyTo) {
+                            channel.sendToQueue(replyTo, Buffer.from(JSON.stringify({error: error})), {
+                                correlationId: correlationId
+                            });
+                        }
+                    }
                 } else {
                     Logger.error(`No handler found for message: ${messageName}`);
                 }
