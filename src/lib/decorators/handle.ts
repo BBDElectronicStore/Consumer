@@ -1,5 +1,7 @@
 import {MessageHandler} from "../types/MessageHanlder";
 import {Logger} from "../logger";
+import {sendMessage} from "../../util/sendMessage";
+import {ElectronicsStoreErrorConfig} from "../../config/electronics";
 
 export const messageHandlers = new Map<string, MessageHandler>();
 
@@ -11,8 +13,7 @@ export function Handle(messageType: string) {
                 return await originalMethod.apply(this, args);
             } catch (error) {
                 Logger.error(`Error handler for ${messageType}`);
-                // Should we be pushing to error queue here?
-                // IF standard is followed then we can just append _ERR to the message type and route it to the error queue
+                await sendMessage(args[0], `${messageType}_ERR`, ElectronicsStoreErrorConfig);
             }
         }
         messageHandlers.set(messageType, descriptor.value);

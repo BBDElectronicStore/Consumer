@@ -1,53 +1,62 @@
-import amqp from 'amqplib';
+import { SQSClient, ReceiveMessageCommand, DeleteMessageCommand, SendMessageCommand } from "@aws-sdk/client-sqs";
 import {MessageHandler} from "./types/MessageHanlder";
-import {Logger} from "./logger";
+import { Logger } from "./logger";
+import {IConfig} from "../config/IConfig";
 
-export async function listenToQueue(handlers: Map<string, MessageHandler>, queue: string, queueUrl: string) {
-    try {
-        const connection = await amqp.connect(queueUrl);
-        const channel = await connection.createChannel();
+export async function listenToQueue(handlers: Map<string, MessageHandler>,config: IConfig){
+    const sqsClient = new SQSClient({
+        region: config.REGION,
+        endpoint: config.QUEUE_URL,
+        credentials: {
+            accessKeyId: config.ACCESS_KEY_ID,
+            secretAccessKey: config.SECRET_ACCESS_KEY
+        }
+    });
 
-        await channel.assertQueue(queue, {
-            durable: true
-        });
+    const queueUrl = `${config.QUEUE_URL}/queue/${config.MAIN_QUEUE}`;
+    Logger.debug(`Listening to queue: ${config.QUEUE_URL}`);
+        while (true) {
+            try {
+                const receiveParams = {
+                    QueueUrl: queueUrl,
+                    MaxNumberOfMessages: 1,
+                    WaitTimeSeconds: 20,
+                };
 
-        Logger.debug(`Waiting for messages from queue: ${queue}`);
+                const receiveCommand = new ReceiveMessageCommand(receiveParams);
+                const { Messages } = await sqsClient.send(receiveCommand);
 
-        await channel.consume(queue, async (msg) => {
-            if (msg !== null) {
-                const messageName = msg.properties.headers?.name || 'Unnamed Message';
-                const messageContent = msg.content.toString();
-                const replyTo = msg.properties.replyTo;
-                const correlationId = msg.properties.correlationId;
+                if (Messages && Messages.length > 0) {
+                    const message = Messages[0];
+                    const messageBody = JSON.parse(message.Body || '{}');
+                    const messageName = messageBody.name || 'Unnamed Message';
+                    const messageContent = messageBody.content;
+                    const correlationId = message.MessageId;
 
-                Logger.debug(`[${correlationId}] ${messageName}`);
-                Logger.debug(`[${correlationId}] Body: ${messageContent}`);
-                const handler = handlers.get(messageName);
-                if (handler) {
-                    try {
-                        const result = await handler(JSON.parse(messageContent));
+                    Logger.debug(`[${correlationId}] ${messageName}`);
+                    Logger.debug(`[${correlationId}] Body: ${JSON.stringify(messageContent)}`);
 
-                        if (replyTo) {
-                            channel.sendToQueue(replyTo, Buffer.from(JSON.stringify(result)), {
-                                correlationId: correlationId
-                            });
-                            Logger.debug(`[${correlationId}] response: ${result}`);
+                    const handler = handlers.get(messageName);
+                    if (handler) {
+                        try {
+                            await handler(messageContent);
+                        } catch (error) {
+                            Logger.error(`Error processing message[${correlationId}]: ${error}`);
                         }
-                    } catch (error) {
-                        Logger.error(`Error processing message: ${error}`);
-                        if (replyTo) {
-                            channel.sendToQueue(replyTo, Buffer.from(JSON.stringify({error: error})), {
-                                correlationId: correlationId
-                            });
-                        }
+                    } else {
+                        // What should we do if the handler is not found?
+                        Logger.error(`No handler found for message: ${messageName}`);
                     }
-                } else {
-                    Logger.error(`No handler found for message: ${messageName}`);
+
+                    const deleteCommand = new DeleteMessageCommand({
+                        QueueUrl: queueUrl,
+                        ReceiptHandle: message.ReceiptHandle,
+                    });
+                    await sqsClient.send(deleteCommand);
                 }
-                channel.ack(msg);
+            } catch (error) {
+                Logger.error(`Error listening to queue: ${error}`);
             }
-        });
-    } catch (error) {
-        Logger.error(`Error listening to queue: ${error}`);
-    }
+        }
+
 }
