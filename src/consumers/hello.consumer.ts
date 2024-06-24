@@ -15,7 +15,7 @@ import {HelloRepository} from "../repositories/hello.repository";
  * error message handling TBD
  */
 
-export class HelloConsumer implements IConsume<void, [message: any]>{
+export class HelloConsumer implements IConsume<any, any> {
 
     @Handle(HelloMessage.default)
     async successHandler(message: any) {

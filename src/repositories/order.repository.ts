@@ -25,7 +25,7 @@ export class OrderRepository implements IRepository {
             const orderId = insertOrderResult.rows[0].order_id;
             Logger.debug(`[${correlationId}]Order inserted with ID: ${orderId}`);
             await DBPool.query('COMMIT');
-            return orderId;
+            return totalCost;
         }
         catch (e) {
             await DBPool.query('ROLLBACK');

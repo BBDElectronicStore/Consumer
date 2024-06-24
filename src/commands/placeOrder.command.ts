@@ -2,14 +2,14 @@ import {ICommand} from "./ICommand";
 import {OrderRepository} from "../repositories/order.repository";
 
 
-export class PlaceOrderCommand implements ICommand<any, [customerId: number, quantity: number, correlationId: string]> {
+export class PlaceOrderCommand implements ICommand<Promise<number | undefined>, [customerId: number, quantity: number, correlationId: string]> {
 
     constructor(private readonly repository: OrderRepository) {}
 
-    execute(customerId: number, quantity: number, correlationId: string) {
+    async execute(customerId: number, quantity: number, correlationId: string) {
         console.log(customerId, quantity, correlationId);
         if(this.validate(customerId, quantity, correlationId))
-            return this.repository.placeOrder(quantity, customerId, correlationId);
+            return await this.repository.placeOrder(quantity, customerId, correlationId);
         return undefined;
     }
 
