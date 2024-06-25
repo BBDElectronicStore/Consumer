@@ -18,7 +18,7 @@ export class OrderRepository implements IRepository {
             const totalCost = quantity * (price + (price * (VAT/100)));
 
             const insertOrderResult = await DBPool.query(`
-              INSERT INTO orders (customer_id, quanity, status_id, total_cost, reference_number)
+              INSERT INTO orders (customer_id, quantity, status_id, total_cost, reference_number)
               VALUES ($1, $2, 1, $3, $4)
               RETURNING order_id
             `, [customerId, quantity, totalCost, correlationId]);
@@ -30,6 +30,25 @@ export class OrderRepository implements IRepository {
         catch (e) {
             await DBPool.query('ROLLBACK');
             console.error('Error inserting order:', e);
+            throw e;
+        }
+    }
+
+    public async updateOrderStatus(correlationId: string, status: string) {
+        try {
+            await DBPool.query('BEGIN');
+            const updateOrderResult = await DBPool.query(`
+              UPDATE orders
+              SET status_id = (SELECT status_id FROM status WHERE status_name = $1)
+              WHERE reference_number = $2
+            `, [status, correlationId]);
+            Logger.debug(`[${correlationId}]Order status updated to ${status}`);
+            await DBPool.query('COMMIT');
+            return updateOrderResult.rowCount;
+        }
+        catch (e) {
+            await DBPool.query('ROLLBACK');
+            console.error('Error updating order status:', e);
             throw e;
         }
     }

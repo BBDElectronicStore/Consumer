@@ -9,7 +9,7 @@ export class FulfilOrderCommand implements ICommand<Promise<any>, [correlationId
     async execute(correlationId: string) {
         if(!this.validate(correlationId))
             throw new Error(`Invalid GUID ${correlationId}`);
-        return 1;
+        return await this.repository.updateOrderStatus(correlationId, "approved");
     }
 
     validate(correlationId: string): boolean {
