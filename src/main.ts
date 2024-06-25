@@ -4,6 +4,7 @@ import {listenToQueue} from "./lib/listen";
 import {ElectronicsStoreDefaultConfig} from "./config/electronics";
 import {OrderConsumer} from "./consumers/order.consumer";
 import {PaymentConsumer} from "./consumers/payment.consumer";
+import {CancelConsumer} from "./consumers/cancel.consumer";
 
 /**
  * Please add your consumers to this array
@@ -13,6 +14,7 @@ import {PaymentConsumer} from "./consumers/payment.consumer";
 const consumers = [
     HelloConsumer,
     OrderConsumer,
-    PaymentConsumer
+    PaymentConsumer,
+    CancelConsumer
 ]
 listenToQueue(messageHandlers, ElectronicsStoreDefaultConfig).then();

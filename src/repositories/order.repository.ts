@@ -52,4 +52,34 @@ export class OrderRepository implements IRepository {
             throw e;
         }
     }
+
+    public async getOrderStatus(correlationId: string): Promise<string> {
+        try {
+            const res = await DBPool.query(`
+              SELECT 
+                o."order_id",
+                c."name" AS customer_name,
+                o."quantity",
+                o."total_cost",
+                o."reference_number",
+                s."status_name" AS order_status
+              FROM 
+                "orders" o
+              JOIN 
+                "customers" c ON o."customer_id" = c."customer_id"
+              JOIN 
+                "status" s ON o."status_id" = s."status_id"
+              WHERE 
+                o."reference_number" = $1;
+            `, [correlationId]);
+            if (res.rows.length === 0) {
+                throw new Error(`Order not found for ${correlationId}`);
+            }
+            return res.rows[0].order_status;
+        }
+        catch (e) {
+            console.error('Error getting order status:', e);
+            throw e;
+        }
+    }
 }
