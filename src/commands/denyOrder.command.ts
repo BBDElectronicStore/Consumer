@@ -2,7 +2,7 @@ import {ICommand} from "./ICommand";
 import {OrderRepository} from "../repositories/order.repository";
 
 
-export class DenyOrderCommand implements ICommand<Promise<any>, [correlationId: string]> {
+export class DenyOrderCommand implements ICommand<Promise<number|null>, [correlationId: string]> {
 
     constructor(private readonly repository: OrderRepository) {}
 
