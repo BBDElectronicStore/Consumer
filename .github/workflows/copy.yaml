@@ -1,0 +1,71 @@
+name: Sync Repository
+
+on:
+  pull_request:
+    branches:
+      - main
+  push:
+    branches:
+      - main
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+
+    env:
+      BRANCH_NAME: alignment-${{ github.run_id }}
+
+    steps:
+      - name: Checkout Source Repository
+        uses: actions/checkout@v3
+
+      - name: Setup Git
+        run: |
+          git config --global user.name 'github-actions[bot]'
+          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+
+      - name: Clone Target Repository
+        env:
+          TARGET_REPO: https://x-access-token:${{ secrets.ACCESS_TOKEN }}@github.com/BBDElectronicStore/Backend.git
+        run: |
+          git clone --depth 1 --branch main ${{ env.TARGET_REPO }} target_repo
+          cd target_repo
+          git checkout -b ${{ env.BRANCH_NAME }}
+          if [ -d "src/consumer_src" ]; then git rm -rf src/consumer_src; fi
+          mkdir -p src/consumer_src
+
+      - name: Copy Files
+        run: |
+          cp -R src/* target_repo/src/consumer_src/
+
+      - name: Commit and Push Changes
+        run: |
+          cd target_repo
+          git add .
+          git commit -m "Sync from source repo" || echo "No changes to commit"
+          git push https://x-access-token:${{ secrets.ACCESS_TOKEN }}@github.com/BBDElectronicStore/Backend.git ${{ env.BRANCH_NAME }}
+
+      - name: Create Pull Request
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.ACCESS_TOKEN }}
+          script: |
+            try {
+              const pr = await github.rest.pulls.create({
+                owner: 'BBDElectronicStore',
+                repo: 'Backend',
+                title: "Update consumer_src",
+                head: "${{ env.BRANCH_NAME }}",
+                base: "main",
+                body: "This PR updates the consumer_src directory with the latest changes from the src directory in the source repository."
+              });
+              console.log(`Pull Request created: ${pr.data.html_url}`);
+            } catch (error) {
+              console.log(`Error creating Pull Request: ${error.message}`);
+              console.log(JSON.stringify(error, null, 2));
+            }
+
+      - name: Check Pull Request
+        if: success()
+        run: |
+          echo "Pull Request created successfully. Please check the action logs for the PR URL."
