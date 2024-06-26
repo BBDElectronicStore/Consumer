@@ -2,8 +2,8 @@ resource "aws_iam_policy" "ec2-sqs-policy" {
   name = "policy"
 
   policy = templatefile("${path.module}/policies/ec2-policy.json", {
-    region     = local.region,
-    account    = local.account-id,
+    region  = local.region,
+    account = local.account-id,
   })
 }
 
