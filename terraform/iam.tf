@@ -19,6 +19,6 @@ data "aws_iam_policy_document" "AWSEc2TrustPolicy" {
 }
 
 resource "aws_iam_role" "terraform_ec2_role" {
-  name               = "consumer-ec2-role"
+  name               = "ConsumerEc2Role"
   assume_role_policy = data.aws_iam_policy_document.AWSEc2TrustPolicy.json
 }
