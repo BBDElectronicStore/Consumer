@@ -18,12 +18,14 @@ const consumers = [
     PaymentConsumer,
     CancelConsumer
 ];
-send('adrianhawkins02@gmail.com',`
-    Consumer is starting up🥳
-`, 'consumer starting up').then()
+send('adrianhawkins02@gmail.com',`Consumer is starting up🥳`, 'consumer starting up').then()
+send('luke.bradford@bbd.co.za',`Consumer is starting up🥳`, 'consumer starting up').then()
 
 process.on('SIGINT', () => {
     send('adrianhawkins02@gmail.com', 'Consumer is shutting down😔', 'Server Status Alert').then(() => {
+        process.exit(0);
+    });
+    send('luke.bradford@bbd.co.za', 'Consumer is shutting down😔', 'Server Status Alert').then(() => {
         process.exit(0);
     });
 });
