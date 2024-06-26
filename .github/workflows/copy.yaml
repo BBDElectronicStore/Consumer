@@ -27,9 +27,10 @@ jobs:
         run: |
           git clone --depth 1 --branch main ${{ env.TARGET_REPO }} target_repo
           cd target_repo
+          git checkout main
           git pull
-          git checkout alignment
-          git pull origin main || true
+          BRANCH_NAME="alignment-$(date +%Y%m%d%H%M%S)"
+          git checkout -b $BRANCH_NAME
           git rm -rf consumer_src
           mkdir -p consumer_src
 
