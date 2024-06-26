@@ -11,7 +11,8 @@ on:
 jobs:
   sync:
     runs-on: ubuntu-latest
-
+    env:
+      BRANCH_NAME:"alignment-$(date +%Y%m%d%H%M%S)"
     steps:
       - name: Checkout Source Repository
         uses: actions/checkout@v2
@@ -29,8 +30,7 @@ jobs:
           cd target_repo
           git checkout main
           git pull
-          BRANCH_NAME="alignment-$(date +%Y%m%d%H%M%S)"
-          git checkout -b $BRANCH_NAME
+          git checkout -b ${{BRANCH_NAME}}
           if [ -d "consumer_src" ]; then git rm -rf consumer_src; fi
           mkdir -p consumer_src
 
@@ -43,7 +43,7 @@ jobs:
           cd target_repo
           git add .
           git commit -m "Sync from source repo" || true
-          git push origin alignment
+          git push origin ${{BRANCH_NAME}}
         env:
           GITHUB_TOKEN: ${{ secrets.ACCESS_TOKEN }}
 
