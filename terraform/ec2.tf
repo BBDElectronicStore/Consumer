@@ -2,11 +2,12 @@
 
 resource "aws_instance" "Consumer" {
   subnet_id              = data.aws_subnet.public_subnet_eu_west_1a.id
-  depends_on             = [aws_security_group.ec2_security_group]
+  depends_on             = [aws_security_group.ec2_security_group, aws_iam_instance_profile.ec2_instance_profile]
   ami                    = "ami-0d940f23d527c3ab1"
   instance_type          = "t2.micro"
   vpc_security_group_ids = [aws_security_group.ec2_security_group.id]
-  iam_instance_profile   = aws_iam_role.terraform_ec2_role.name
+  iam_instance_profile   = aws_iam_instance_profile.ec2_instance_profile.name
+  
 
 }
 
