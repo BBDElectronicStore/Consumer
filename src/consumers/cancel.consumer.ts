@@ -11,14 +11,14 @@ import {CancelOrderCommand} from "../commands/cancelOrder.command";
 export class CancelConsumer implements IConsume<Cancel, Cancel> {
 
     @Handle(CancelMessage.default)
-    async successHandler(message: payment) {
+    async successHandler(message: Cancel) {
         const command = new CancelOrderCommand(new OrderRepository());
         await command.execute(message.orderRef);
         Logger.debug(`[${message.orderRef}] Order cancelled`);
     }
 
     @Handle(CancelMessage.err)
-    async errorHandler(message: payment) {
+    async errorHandler(message: Cancel) {
         console.log("handling hello message err");
     }
 }
