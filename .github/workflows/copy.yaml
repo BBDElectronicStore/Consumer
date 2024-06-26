@@ -27,6 +27,7 @@ jobs:
         run: |
           git clone --depth 1 --branch main ${{ env.TARGET_REPO }} target_repo
           cd target_repo
+          git pull
           git checkout alignment
           git pull origin main || true
           git rm -rf consumer_src
