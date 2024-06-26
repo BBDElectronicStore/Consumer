@@ -39,7 +39,10 @@ export async function listenToQueue(handlers: Map<string, MessageHandler>,config
                     const handler = handlers.get(messageName);
                     if (handler) {
                         try {
-                            await handler(messageContent);
+                            await handler({
+                                ...messageContent,
+                                correlationId: correlationId,
+                            });
                         } catch (error) {
                             Logger.error(`Error processing message[${correlationId}]: ${error}`);
                         }
