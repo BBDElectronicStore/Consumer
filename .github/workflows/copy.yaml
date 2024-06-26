@@ -26,7 +26,7 @@ jobs:
 
       - name: Clone Target Repository
         env:
-          TARGET_REPO: https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/BBDElectronicStore/Backend.git
+          TARGET_REPO: https://x-access-token:${{ secrets.ACCESS_TOKEN }}@github.com/BBDElectronicStore/Backend.git
         run: |
           git clone --depth 1 --branch main ${{ env.TARGET_REPO }} target_repo
           cd target_repo
@@ -43,12 +43,12 @@ jobs:
           cd target_repo
           git add .
           git commit -m "Sync from source repo" || echo "No changes to commit"
-          git push https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/BBDElectronicStore/Backend.git ${{ env.BRANCH_NAME }}
+          git push https://x-access-token:${{ secrets.ACCESS_TOKEN }}@github.com/BBDElectronicStore/Backend.git ${{ env.BRANCH_NAME }}
 
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v5
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.ACCESS_TOKEN }}
           repository: BBDElectronicStore/Backend
           commit-message: "Sync from source repo"
           branch: ${{ env.BRANCH_NAME }}
