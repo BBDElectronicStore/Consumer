@@ -12,7 +12,7 @@ jobs:
   sync:
     runs-on: ubuntu-latest
     env:
-      BRANCH_NAME:"alignment-$(date +%Y%m%d%H%M%S)"
+      BRANCH_NAME: alignment-$(date +%Y%m%d%H%M%S)
     steps:
       - name: Checkout Source Repository
         uses: actions/checkout@v2
