@@ -52,7 +52,7 @@ jobs:
         with:
           token: ${{ secrets.ACCESS_TOKEN }}
           commit-message: "Sync from source repo"
-          branch: alignment
+          branch: ${{env.BRANCH_NAME}}
           title: "Update consumer_src"
           body: "This PR updates the consumer_src directory with the latest changes from the src directory in the source repository."
           base: main
