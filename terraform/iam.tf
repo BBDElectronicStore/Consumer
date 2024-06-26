@@ -4,7 +4,6 @@ resource "aws_iam_policy" "ec2-sqs-policy" {
   policy = templatefile("${path.module}/policies/ec2-policy.json", {
     region     = local.region,
     account    = local.account-id,
-    queue_name = aws_sqs_queue.electronics_retailer_queue.name,
   })
 }
 
