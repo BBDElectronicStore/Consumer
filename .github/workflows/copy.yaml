@@ -46,12 +46,26 @@ jobs:
           git push https://x-access-token:${{ secrets.ACCESS_TOKEN }}@github.com/BBDElectronicStore/Backend.git ${{ env.BRANCH_NAME }}
 
       - name: Create Pull Request
-        uses: peter-evans/create-pull-request@v5
+        uses: actions/github-script@v6
         with:
-          token: ${{ secrets.ACCESS_TOKEN }}
-          push-to-fork: BBDElectronicStore/Backend
-          branch: ${{ env.BRANCH_NAME }}
-          base: main
-          title: "Update consumer_src"
-          body: "This PR updates the consumer_src directory with the latest changes from the src directory in the source repository."
-          commit-message: "Sync from source repo"
+          github-token: ${{ secrets.PAT_TOKEN }}
+          script: |
+            try {
+              const pr = await github.rest.pulls.create({
+                owner: 'BBDElectronicStore',
+                repo: 'Backend',
+                title: "Update consumer_src",
+                head: "${{ env.BRANCH_NAME }}",
+                base: "main",
+                body: "This PR updates the consumer_src directory with the latest changes from the src directory in the source repository."
+              });
+              console.log(`Pull Request created: ${pr.data.html_url}`);
+            } catch (error) {
+              console.log(`Error creating Pull Request: ${error.message}`);
+              console.log(JSON.stringify(error, null, 2));
+            }
+
+      - name: Check Pull Request
+        if: success()
+        run: |
+          echo "Pull Request created successfully. Please check the action logs for the PR URL."
