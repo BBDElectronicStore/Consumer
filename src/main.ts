@@ -5,6 +5,7 @@ import {ElectronicsStoreDefaultConfig} from "./config/electronics";
 import {OrderConsumer} from "./consumers/order.consumer";
 import {PaymentConsumer} from "./consumers/payment.consumer";
 import {CancelConsumer} from "./consumers/cancel.consumer";
+import {send} from "./util/smtp";
 
 /**
  * Please add your consumers to this array
@@ -16,5 +17,17 @@ const consumers = [
     OrderConsumer,
     PaymentConsumer,
     CancelConsumer
-]
+];
+send('adrianhawkins02@gmail.com',`Consumer is starting up🥳`, 'consumer starting up').then()
+send('luke.bradford@bbd.co.za',`Consumer is starting up🥳`, 'consumer starting up').then()
+
+process.on('SIGINT', () => {
+    send('adrianhawkins02@gmail.com', 'Consumer is shutting down😔', 'Server Status Alert').then(() => {
+        process.exit(0);
+    });
+    send('luke.bradford@bbd.co.za', 'Consumer is shutting down😔', 'Server Status Alert').then(() => {
+        process.exit(0);
+    });
+});
+
 listenToQueue(messageHandlers, ElectronicsStoreDefaultConfig).then();
