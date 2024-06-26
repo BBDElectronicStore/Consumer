@@ -1,0 +1,54 @@
+name: Sync Repository
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Source Repository
+        uses: actions/checkout@v2
+
+      - name: Setup Git
+        run: |
+          git config --global user.name 'github-actions[bot]'
+          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+
+      - name: Clone Target Repository
+        env:
+          TARGET_REPO: https://github.com/BBDElectronicStore/Backend.git
+        run: |
+          git clone --depth 1 --branch main ${{ env.TARGET_REPO }} target_repo
+          cd target_repo
+          git checkout alignment
+          git pull origin main || true
+          git rm -rf consumer_src
+          mkdir -p consumer_src
+
+      - name: Copy Files
+        run: |
+          cp -R src/* target_repo/consumer_src/
+
+      - name: Commit and Push Changes
+        run: |
+          cd target_repo
+          git add .
+          git commit -m "Sync from source repo" || true
+          git push origin alignment
+        env:
+          GITHUB_TOKEN: ${{ secrets.ACCESS_TOKEN }}
+
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v4
+        with:
+          token: ${{ secrets.ACCESS_TOKEN }}
+          commit-message: "Sync from source repo"
+          branch: alignment
+          title: "Update consumer_src"
+          body: "This PR updates the consumer_src directory with the latest changes from the src directory in the source repository."
+          base: main
+          delete-branch: false
