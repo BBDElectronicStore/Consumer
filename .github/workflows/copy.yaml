@@ -30,7 +30,7 @@ jobs:
           cd target_repo
           git checkout main
           git pull
-          git checkout -b ${{BRANCH_NAME}}
+          git checkout -b ${{env.BRANCH_NAME}}
           if [ -d "consumer_src" ]; then git rm -rf consumer_src; fi
           mkdir -p consumer_src
 
@@ -43,7 +43,7 @@ jobs:
           cd target_repo
           git add .
           git commit -m "Sync from source repo" || true
-          git push origin ${{BRANCH_NAME}}
+          git push origin ${{env.BRANCH_NAME}}
         env:
           GITHUB_TOKEN: ${{ secrets.ACCESS_TOKEN }}
 
