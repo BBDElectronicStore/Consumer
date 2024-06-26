@@ -31,12 +31,12 @@ jobs:
           git clone --depth 1 --branch main ${{ env.TARGET_REPO }} target_repo
           cd target_repo
           git checkout -b ${{ env.BRANCH_NAME }}
-          if [ -d "consumer_src" ]; then git rm -rf consumer_src; fi
-          mkdir -p consumer_src
+          if [ -d "src/consumer_src" ]; then git rm -rf src/consumer_src; fi
+          mkdir -p src/consumer_src
 
       - name: Copy Files
         run: |
-          cp -R src/* target_repo/consumer_src/
+          cp -R src/* target_repo/src/consumer_src/
 
       - name: Commit and Push Changes
         run: |
@@ -48,11 +48,20 @@ jobs:
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v5
         with:
-          token: ${{ secrets.ACCESS_TOKEN }}
-          repository: BBDElectronicStore/Backend
+          token: ${{ secrets.PAT_TOKEN }}
           commit-message: "Sync from source repo"
           branch: ${{ env.BRANCH_NAME }}
           title: "Update consumer_src"
           body: "This PR updates the consumer_src directory with the latest changes from the src directory in the source repository."
           base: main
           delete-branch: false
+          draft: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.PAT_TOKEN }}
+          PULL_REQUEST_BRANCH: ${{ env.BRANCH_NAME }}
+
+      - name: Check outputs
+        if: ${{ steps.cpr.outputs.pull-request-number }}
+        run: |
+          echo "Pull Request Number - ${{ steps.cpr.outputs.pull-request-number }}"
+          echo "Pull Request URL - ${{ steps.cpr.outputs.pull-request-url }}"
