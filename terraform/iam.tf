@@ -1,5 +1,5 @@
 resource "aws_iam_policy" "ec2-sqs-policy" {
-  name = "policy"
+  name = "consumer-ec2-policy"
 
   policy = templatefile("${path.module}/policies/ec2-policy.json", {
     region  = local.region,
@@ -19,6 +19,6 @@ data "aws_iam_policy_document" "AWSEc2TrustPolicy" {
 }
 
 resource "aws_iam_role" "terraform_ec2_role" {
-  name               = "terraform_function_role"
+  name               = "consumer-ec2-role"
   assume_role_policy = data.aws_iam_policy_document.AWSEc2TrustPolicy.json
 }

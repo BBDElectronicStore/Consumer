@@ -11,7 +11,8 @@ resource "aws_instance" "Consumer" {
 }
 
 resource "aws_security_group" "ec2_security_group" {
-  name = "ec2_security_group"
+  vpc_id = data.aws_vpc.main.id
+  name   = "ec2_security_group"
   ingress {
     from_port   = 22
     to_port     = 22
